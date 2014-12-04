@@ -68,6 +68,20 @@ class IntellCollector:
     def config(self, **kwargs):
         self.target = kwargs.get("target", None)
 
+    # --------------------------------------------------------------------------
+    def getsess(self):
+        out = Displayer()
+        if 'set-cookie' in self.originalhead:
+            out.display(self.originalhead['set-cookie'])
+            m = re.search("(PHPSESSID=(?P<value>.*);)", self.originalhead['set-cookie'])
+            if m:
+                out.display(m.group('value'))
+                self.originalsess = m.group('value')
+            else:
+                self.originalsess = ''
+        else:
+            self.originalsess = ''
+
     # ---------------------------------------------------------------------
     def gather(self, params):
         out = Displayer()
@@ -82,7 +96,7 @@ class IntellCollector:
         self.originalreq_lines = [x.decode(self.charset) for x in originalreq['body'].splitlines()]
         self.originalhead = originalreq['head']
         out.display(originalreq['head'])
-        self.originalsess = getsess(originalreq['head'])
+        self.getsess()
         self.parsedurl = urlparse(self.target)
         self.parametros = self.parsedurl.query.split('&')
 
