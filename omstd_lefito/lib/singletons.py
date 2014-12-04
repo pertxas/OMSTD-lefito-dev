@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__ALL__ = ["Displayer", "IntellCollector"]
+__all__ = ["Displayer", "IntellCollector"]
 
 import re
 import difflib

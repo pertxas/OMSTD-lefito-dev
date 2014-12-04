@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'pertxas - partxas<-at->gmail.com (@pertxas)'
-
 import argparse
-
 
 def main():
     from .api import Parameters, Results, Displayer, IntellCollector, connect_tor, testip, menuppal
