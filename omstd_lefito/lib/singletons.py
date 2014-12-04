@@ -2,6 +2,11 @@
 
 __ALL__ = ["Displayer", "IntellCollector"]
 
+import re
+import difflib
+from urllib.parse import urlparse
+from .commonfuncts import dorequest, readpayloads, menupayloads, cleanhtml
+
 # -------------------------------------------------------------------------
 class Displayer:
     """Output system"""
@@ -19,7 +24,7 @@ class Displayer:
         self.out_screen = kwargs.get("out_screen", True)
         self.verbosity = kwargs.get("verbosity", 0)
         if self.out_file:
-        self.out_file_handler = open(self.out_file, "w")
+            self.out_file_handler = open(self.out_file, "w")
 
     # ---------------------------------------------------------------------
     def display(self, message):
@@ -90,10 +95,16 @@ class IntellCollector:
         else:
             self.target = str(input("url: "))
         originalreq = dorequest(self.target, params)
-        m = re.search(b"(charset=(?P<value>.*)\")", originalreq['body'])
+        try:
+            m = re.search("(charset=(?P<value>.*)\")", originalreq['body'])
+        except TypeError:
+            m = re.search(b"(charset=(?P<value>.*)\")", originalreq['body'])
         if m:
             self.charset = m.group('value').decode()
-        self.originalreq_lines = [x.decode(self.charset) for x in originalreq['body'].splitlines()]
+        try:
+            self.originalreq_lines = [x.decode(self.charset) for x in originalreq['body'].splitlines()]
+        except AttributeError:
+            self.originalreq_lines = originalreq['body'].splitlines()
         self.originalhead = originalreq['head']
         out.display(originalreq['head'])
         self.getsess()
@@ -110,6 +121,66 @@ class IntellCollector:
         out.display("parsedurl: %s" % str(self.parsedurl))
         out.display("parametros: %s" % str(self.parametros))
         out.display("charset: %s" % str(self.charset))
+
+    # ---------------------------------------------------------------------
+    def startrecogn(self, params, results):
+        if params.payloads is not None:
+            pause = input("Pause? [y/n]")
+            payloadslist = readpayloads(params.payloads)
+            self.attack(payloadslist, pause, params, results)
+        else:
+            selectedpayloadlist = menupayloads('./payloads')
+            while selectedpayloadlist != 'q':
+                pause = input("Pause? [y/n]")
+                payloadslist = readpayloads(selectedpayloadlist)
+                self.attack(payloadslist, pause, params, results)
+                selectedpayloadlist = menupayloads('./payloads')
+
+    # ---------------------------------------------------------------------
+    def attack(self, payloadslist, pause, params, results):
+        out = Displayer()
+        for parametro in self.parametros:
+            urls = self.genurls(payloadslist, parametro)
+            for url in urls:
+                out.display('-' * len(url))
+                out.display(url)
+                out.display('-' * len(url))
+                results.diffs[url] = ""
+                req = "%s://%s%s?%s" % (self.parsedurl.scheme,
+                                        self.parsedurl.netloc,
+                                        self.parsedurl.path,
+                                        url)
+                result = dorequest(req, params)
+                try:
+                    result_lines = [x.decode(self.charset) for x in result['body'].splitlines()]
+                except AttributeError:
+                    result_lines = result['body'].splitlines()
+                difflib.Differ()
+                diff = difflib.unified_diff(self.originalreq_lines, result_lines)
+                for line in diff:
+                    if line.startswith('+'):
+                        line = line.strip("+ ")
+                        line = cleanhtml(line)
+                        if len(line) > 1:
+                            out.display(line)
+                            results.diffs[url] += "%s\n" % line
+                if pause == 'y':
+                    cont = input('press enter to continue (q+enter to quit)')
+                    if cont == 'q':
+                        break
+
+    # --------------------------------------------------------------------------
+    def genurls(self, payloadslist, parametro):
+        valores = parametro.split('=')
+        resultado = []
+        for payload in payloadslist:
+            cadena = payload.replace("[FOO]", valores[0])
+            cadena = cadena.replace("[BAR]", valores[1])
+            cadena = cadena.replace("[SESS]", self.originalsess)
+            cadena = cadena.replace("[HOST]", self.parsedurl.netloc)
+            cadena = cadena.replace("[STHOST]", self.parsedurl.netloc.replace("www.", ""))
+            resultado.append(cadena)
+        return resultado
 
     # ---------------------------------------------------------------------
     def __init__(self):
