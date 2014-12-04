@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: OMSTD-lefito
+Version: dev
+Summary: OMSTD exercise: LFI scanner.
+Home-page: 
+Author: pertxas
+Author-email: pertxas<-at->gmail.com
+License: MIT License
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Environment :: Console
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Other Audience
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Security
