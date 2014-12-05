@@ -53,16 +53,23 @@ def readpayloads(fname):
 
 # --------------------------------------------------------------------------
 def menupayloads(dirname):
+    result = []
     listapayloads = os.listdir(dirname)
     n = 0
     listapayloads.sort()
     for payload in listapayloads:
         print("[%i] %s" % (n, payload))
         n += 1
+    print("[a] Todos")
     print("[q] Salir")
-    try:
-        select = int(input("elige: "))
-        payloadseleccionado = listapayloads[select]
-        return dirname + '/' + payloadseleccionado
-    except:
-        return 'q'
+    select = input("elige: ")
+    if select == 'a':
+        for payload in listapayloads:
+            result.append("%s/%s" % (dirname, payload))
+    else:
+        try:
+            payloadseleccionado = listapayloads[int(select)]
+            result = ["%s/%s" % (dirname, payloadseleccionado)]
+        except:
+            result = []
+    return result

@@ -130,9 +130,11 @@ class IntellCollector:
             self.attack(payloadslist, pause, params, results)
         else:
             selectedpayloadlist = menupayloads('./payloads')
-            while selectedpayloadlist != 'q':
+            while len(selectedpayloadlist) > 0:
                 pause = input("Pause? [y/n]")
-                payloadslist = readpayloads(selectedpayloadlist)
+                payloadslist = []
+                for item in selectedpayloadlist:
+                    payloadslist += readpayloads(item)
                 self.attack(payloadslist, pause, params, results)
                 selectedpayloadlist = menupayloads('./payloads')
 
