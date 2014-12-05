@@ -73,3 +73,15 @@ def menupayloads(dirname):
         except:
             result = []
     return result
+
+# --------------------------------------------------------------------------
+def getallpayloads(dirname):
+    resulttmp = []
+    result = []
+    listapayloads = os.listdir(dirname)
+    listapayloads.sort()
+    for payload in listapayloads:
+        resulttmp.append("%s/%s" % (dirname, payload))
+    for item in resulttmp:
+        result += readpayloads(item)
+    return result

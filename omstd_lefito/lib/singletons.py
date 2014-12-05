@@ -5,7 +5,7 @@ __all__ = ["Displayer", "IntellCollector"]
 import re
 import difflib
 from urllib.parse import urlparse
-from .commonfuncts import dorequest, readpayloads, menupayloads, cleanhtml
+from .commonfuncts import dorequest, readpayloads, menupayloads, getallpayloads, cleanhtml
 
 # -------------------------------------------------------------------------
 class Displayer:
@@ -126,7 +126,10 @@ class IntellCollector:
     def startrecogn(self, params, results):
         if params.payloads is not None:
             pause = input("Pause? [y/n]")
-            payloadslist = readpayloads(params.payloads)
+            if params.payloads == 'all':
+                payloadslist = getallpayloads('./payloads')
+            else:
+                payloadslist = readpayloads(params.payloads)
             self.attack(payloadslist, pause, params, results)
         else:
             selectedpayloadlist = menupayloads('./payloads')

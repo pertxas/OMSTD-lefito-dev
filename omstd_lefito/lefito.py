@@ -7,7 +7,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="lefito hace cositas de lfi")
     parser.add_argument("-u", dest="url", help="target url")
-    parser.add_argument("-p", dest="payloads", help="payloads file (or 'all'")
+    parser.add_argument("-p", dest="payloads", help="payloads file (or 'all')")
     parser.add_argument("-t", dest="tor", help="use tor", action="store_true")
     parser.add_argument("-c", dest="checkip", help="check ip", action="store_true")
     parser.add_argument("-a", dest="agent", help="custom user agent")
