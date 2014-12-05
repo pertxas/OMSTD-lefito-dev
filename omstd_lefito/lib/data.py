@@ -18,6 +18,7 @@ class Parameters:
         self.payloads = kwargs.get("payloads")
         self.tor = kwargs.get("tor")
         self.checkip = kwargs.get("checkip")
+        self.autorun = kwargs.get("autorun")
         self.agent = kwargs.get("agent")
         self.outfile = kwargs.get("outfile")
 

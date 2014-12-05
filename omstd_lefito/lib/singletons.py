@@ -125,7 +125,10 @@ class IntellCollector:
     # ---------------------------------------------------------------------
     def startrecogn(self, params, results):
         if params.payloads is not None:
-            pause = input("Pause? [y/n]")
+            if params.autorun is not None:
+                pause = 'n'
+            else:
+                pause = input("Pause? [y/n]")
             if params.payloads == 'all':
                 payloadslist = getallpayloads('./payloads')
             else:

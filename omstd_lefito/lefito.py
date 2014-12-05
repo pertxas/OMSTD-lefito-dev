@@ -10,6 +10,7 @@ def main():
     parser.add_argument("-p", dest="payloads", help="payloads file (or 'all')")
     parser.add_argument("-t", dest="tor", help="use tor", action="store_true")
     parser.add_argument("-c", dest="checkip", help="check ip", action="store_true")
+    parser.add_argument("-r", dest="autorun", help="performs auto recogn an attack (needs url and payloads)", action="store_true")
     parser.add_argument("-a", dest="agent", help="custom user agent")
     parser.add_argument("-o", dest="outfile", help="output file")
     params = parser.parse_args()
@@ -19,6 +20,7 @@ def main():
                                       payloads=params.payloads,
                                       tor=params.tor,
                                       checkip=params.checkip,
+                                      autorun=params.autorun,
                                       outfile=params.outfile,
                                       agent=params.agent, )
         results = Results()
@@ -26,7 +28,7 @@ def main():
         d.config(out_screen=True,
                  out_file=params.outfile,
                  verbosity=1)
-        i = IntellCollector()
+        intell = IntellCollector()
     except ValueError as e:
         print(e)
         exit()
@@ -35,7 +37,12 @@ def main():
         connect_tor()
     if params.checkip is not None:
         testip(input_parameters)
-    menuppal(input_parameters, results)
+    if params.autorun is not None:
+        intell.gather(input_parameters)
+        intell.show()
+        intell.startrecogn(params, results)
+    else:
+        menuppal(input_parameters, results)
     print("RESULTS %s" % results.diffs)
 
 
