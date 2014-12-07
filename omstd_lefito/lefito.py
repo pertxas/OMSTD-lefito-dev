@@ -37,8 +37,8 @@ def main():
         connect_tor()
     if params.checkip is not None:
         testip(input_parameters)
-    if params.autorun is not None:
-        intell.gather(input_parameters)
+    if params.autorun:
+        intell.gather(input_parameters, results)
         intell.show()
         intell.startrecogn(params, results)
     else:

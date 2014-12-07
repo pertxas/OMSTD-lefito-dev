@@ -46,7 +46,7 @@ class Displayer:
         if self.out_screen:
             print(message)
         if self.out_file_handler:
-            self.out_file_handler.write(message)
+            self.out_file_handler.write("%s\n" % message)
 
     # ---------------------------------------------------------------------
     def __init__(self):
@@ -87,8 +87,21 @@ class IntellCollector:
         else:
             self.originalsess = ''
 
+    # --------------------------------------------------------------------------
+    def getpath(self, line, payload):
+        m = re.search("(Warning:  (?P<funct1>.*)\((?P<inc>.*)\) \[function\.(?P<funct2>.*)\]: failed to open stream: No such file or directory in (?P<path>.*) on line \d*)",
+                      line)
+        if m:
+            self.cwd = m.group('path').replace(self.parsedurl.path, '/')
+            self.vulninclude = m.group('inc')
+            self.functinclude = m.group('funct1')
+            self.vulncode = ("%s('%s')" % (m.group('funct1'), m.group('inc'))).replace(payload, "$_GET[p]")
+            fijos = m.group('inc').split(payload)
+            self.prefijo = fijos[0]
+            self.sufijo = fijos[1]
+
     # ---------------------------------------------------------------------
-    def gather(self, params):
+    def gather(self, params, results):
         out = Displayer()
         if params.url is not None:
             self.target = params.url
@@ -110,17 +123,30 @@ class IntellCollector:
         self.getsess()
         self.parsedurl = urlparse(self.target)
         self.parametros = self.parsedurl.query.split('&')
-
-    # ---------------------------------------------------------------------
-    def show(self):
-        out = Displayer()
-        out.display("target: %s" % str(self.target))
-        out.display("originalreq_lines: %s" % str(self.originalreq_lines))
-        out.display("originalhead: %s" % str(self.originalhead))
-        out.display("originalsess: %s" % str(self.originalsess))
-        out.display("parsedurl: %s" % str(self.parsedurl))
-        out.display("parametros: %s" % str(self.parametros))
-        out.display("charset: %s" % str(self.charset))
+        payload = '../patata'
+        for parametro in self.parametros:
+            valores = parametro.split('=')
+            url = "%s=%s" % (valores[0], payload)
+            results.diffs[url] = ""
+            req = "%s://%s%s?%s" % (self.parsedurl.scheme,
+                                        self.parsedurl.netloc,
+                                        self.parsedurl.path,
+                                        url)
+            result = dorequest(req, params)
+            try:
+                result_lines = [x.decode(self.charset) for x in result['body'].splitlines()]
+            except AttributeError:
+                result_lines = result['body'].splitlines()
+            difflib.Differ()
+            diff = difflib.unified_diff(self.originalreq_lines, result_lines)
+            for line in diff:
+                if line.startswith('+'):
+                    line = line.strip("+ ")
+                    line = cleanhtml(line)
+                    if len(line) > 1:
+                        out.display(line)
+                        results.diffs[url] += "%s\n" % line
+                        self.getpath(line, payload)
 
     # ---------------------------------------------------------------------
     def startrecogn(self, params, results):
@@ -191,6 +217,23 @@ class IntellCollector:
         return resultado
 
     # ---------------------------------------------------------------------
+    def show(self):
+        out = Displayer()
+        out.display("target: %s" % str(self.target))
+        out.display("originalreq_lines: %s" % str(self.originalreq_lines))
+        out.display("originalhead: %s" % str(self.originalhead))
+        out.display("originalsess: %s" % str(self.originalsess))
+        out.display("parsedurl: %s" % str(self.parsedurl))
+        out.display("parametros: %s" % str(self.parametros))
+        out.display("charset: %s" % str(self.charset))
+        out.display("cwd: %s" % str(self.cwd))
+        out.display("vulninclude: %s" % str(self.vulninclude))
+        out.display("functinclude: %s" % str(self.functinclude))
+        out.display("vulncode: %s" % str(self.vulncode))
+        out.display("prefijo: %s" % str(self.prefijo))
+        out.display("sufijo: %s" % str(self.sufijo))
+
+    # ---------------------------------------------------------------------
     def __init__(self):
         if not self.__initialized:
             self.__initialized = True
@@ -201,3 +244,9 @@ class IntellCollector:
             self.parsedurl = None
             self.parametros = []
             self.charset = 'utf-8'
+            self.cwd = None
+            self.vulninclude = None
+            self.functinclude = None
+            self.vulncode = None
+            self.prefijo = None
+            self.sufijo = None

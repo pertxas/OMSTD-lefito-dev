@@ -33,7 +33,7 @@ def menuppal(params, results):
     choice = showmenuppal()
     while choice != "q":
         if choice == "0":
-            intell.gather(params)
+            intell.gather(params, results)
         elif choice == "1":
             intell.show()
         elif choice == "2":
