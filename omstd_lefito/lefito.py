@@ -33,9 +33,9 @@ def main():
         print(e)
         exit()
 
-    if params.tor is not None:
+    if params.tor:
         connect_tor()
-    if params.checkip is not None:
+    if params.checkip:
         testip(input_parameters)
     if params.autorun:
         intell.gather(input_parameters, results)

@@ -89,13 +89,13 @@ class IntellCollector:
 
     # --------------------------------------------------------------------------
     def getpath(self, line, payload):
-        m = re.search("(Warning:  (?P<funct1>.*)\((?P<inc>.*)\) \[function\.(?P<funct2>.*)\]: failed to open stream: No such file or directory in (?P<path>.*) on line \d*)",
-                      line)
+        pattern = "(Warning:  (?P<funct1>.*)\((?P<inc>.*)\)( \[function\.(?P<funct2>.*)\])?: failed to open stream: No such file or directory in (?P<path>.*) on line \d*)"
+        m = re.search(pattern, line)
         if m:
             self.cwd = m.group('path').replace(self.parsedurl.path, '/')
             self.vulninclude = m.group('inc')
             self.functinclude = m.group('funct1')
-            self.vulncode = ("%s('%s')" % (m.group('funct1'), m.group('inc'))).replace(payload, "$_GET[p]")
+            self.vulncode = ("%s(%s)" % (m.group('funct1'), m.group('inc'))).replace(payload, "$_GET[p]")
             fijos = m.group('inc').split(payload)
             self.prefijo = fijos[0]
             self.sufijo = fijos[1]
