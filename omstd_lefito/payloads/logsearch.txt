@@ -20,3 +20,6 @@
 [FOO]=../logs/[HOST]-access.log
 [FOO]=../logs/[STHOST]-access.log
 [FOO]=../logs/error_log
+[FOO]=../logs/access_log
+[FOO]=../logs/error.log
+[FOO]=../logs/access.log
